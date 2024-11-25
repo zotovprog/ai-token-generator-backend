@@ -54,15 +54,16 @@ export class OpenAIAssistantService implements IAssistantService {
         const assistantMessages = messagesList.data.filter(
           (message) => message.role === "assistant"
         );
-
         if (assistantMessages.length > 0) {
           const assistantContent = assistantMessages[0]
             .content[0] as TextContentBlock;
+
+          console.log(assistantContent);
           let parsedResponse;
           try {
             parsedResponse = JSON.parse(assistantContent.text.value);
           } catch (e) {
-            parsedResponse = { assistantContent };
+            parsedResponse = assistantContent.text.value;
           }
           return parsedResponse;
         } else {

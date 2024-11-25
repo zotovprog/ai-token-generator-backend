@@ -4,6 +4,7 @@ import { OpenAIAssistantService } from "./services/assistantService";
 import { OpenAIModerationService } from "../moderationService";
 import dotenv from "dotenv";
 import cors from "cors";
+import { MidjourneyService } from "./services/midjourneyService";
 
 dotenv.config();
 const app = express();
@@ -22,6 +23,13 @@ const port = process.env.PORT;
 app.post("/generateToken", (req, res) =>
   assistantController.generateToken(req, res)
 );
+
+app.post("/midjourney", async (req, res) => {
+  const midjourneyService = new MidjourneyService();
+  midjourneyService.generateImages("Test", (uri: string, progress: string) => {
+    console.log(uri, progress);
+  });
+});
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
