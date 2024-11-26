@@ -33,7 +33,7 @@ export class AssistantController {
 
   async generateToken(req: Request, res: Response) {
     try {
-      const { topicName } = req.body;
+      const { topicName, imageStyle } = req.body;
       const isFlagged = await this.moderationService.isContentFlagged(
         topicName
       );
@@ -55,7 +55,7 @@ export class AssistantController {
       };
 
       // Process the topic using the orchestrator
-      await this.assistantOrchestrator.processTopic(topicName, sendUpdate);
+      await this.assistantOrchestrator.processTopic(topicName, imageStyle, sendUpdate);
 
       // Signal the end of the SSE stream
       res.write("event: end\ndata: Stream closed\n\n");

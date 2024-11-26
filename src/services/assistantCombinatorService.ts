@@ -4,6 +4,7 @@ import { IMidjourneyService } from "../interfaces/IMidjourneyService";
 export interface IAssistantCombinatorService {
   processTopic(
     topicName: string,
+    imageStyle: string,
     sendUpdate: (data: any) => void
   ): Promise<void>;
 }
@@ -25,14 +26,13 @@ export class AssistantCombinatorService implements IAssistantCombinatorService {
 
   async processTopic(
     topicName: string,
+    imageStyle: string,
     sendUpdate: (data: any) => void
   ): Promise<void> {
-    // First Assistant
     const firstAssistantResponse =
       await this.assistantService.getAssistantResponse(topicName);
     sendUpdate({ firstAssistantResponse });
 
-    // Second Assistant
     const imagePromptCreatorAssistantId =
       process.env.IMAGE_PROMPT_CREATOR_ASSISTANT_ID;
     if (!imagePromptCreatorAssistantId) {
@@ -43,36 +43,19 @@ export class AssistantCombinatorService implements IAssistantCombinatorService {
     const imagePromptCreatorService = this.assistantFactory(
       imagePromptCreatorAssistantId
     );
+
     const imagePromptCreatorResponse =
       await imagePromptCreatorService.getAssistantResponse(
-        JSON.stringify(firstAssistantResponse)
+        JSON.stringify({ firstAssistantResponse, imageStyle })
       );
     sendUpdate({ imagePromptCreatorResponse });
 
-    // Third Assistant
-    const imagePromptVerificatorAssistantId =
-      process.env.IMAGE_PROMPT_VERIFICATOR_ASSISTANT_ID;
-    if (!imagePromptVerificatorAssistantId) {
-      throw new Error(
-        "IMAGE_PROMPT_VERIFICATOR_ASSISTANT_ID is not defined in environment variables."
-      );
-    }
-    const imagePromptVerificatorService = this.assistantFactory(
-      imagePromptVerificatorAssistantId
-    );
-    const finalAssistantResponse =
-      await imagePromptVerificatorService.getAssistantResponse(
-        imagePromptCreatorResponse
-      );
-    sendUpdate({ finalAssistantResponse });
-
-    // Midjourney Image Generation
     const onProgress = (uri: string, progress: string) => {
       sendUpdate({ midjourneyProgress: { uri, progress } });
     };
 
     const midjourneyResult = await this.midjourneyService.generateImages(
-      finalAssistantResponse,
+      imagePromptCreatorResponse,
       onProgress
     );
 

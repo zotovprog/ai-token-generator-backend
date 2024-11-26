@@ -58,7 +58,6 @@ export class OpenAIAssistantService implements IAssistantService {
           const assistantContent = assistantMessages[0]
             .content[0] as TextContentBlock;
 
-          console.log(assistantContent);
           let parsedResponse;
           try {
             parsedResponse = JSON.parse(assistantContent.text.value);
